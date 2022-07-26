@@ -7,8 +7,7 @@ const cors = require('cors')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 
-const uri = 'mongodb+srv://heradenk:mypassword@cluster0.xxzrhgz.mongodb.net/Cluster0?retryWrites=true&w=majority'
-
+const uri = process.env.URI
 
 const app = express()
 app.use(cors())
@@ -94,7 +93,7 @@ app.post('/login', async (req, res) => {
         const client = new MongoClient(uri)		
         const userId = req.query.userId	
         
-        console.log('userId', userId)
+
 
         try {		
             await client.connect()		
@@ -141,7 +140,7 @@ app.get('/users', async (req, res) => {
         const database = client.db('app-data')
         const users = database.collection('users')
 
-        const  pipeline =
+        const pipeline =
             [
                 {
                     '$match': {
@@ -153,7 +152,6 @@ app.get('/users', async (req, res) => {
             ]
         
         const foundUsers = await users.aggregate(pipeline).toArray()
-        
         res.json(foundUsers)
 
     } finally {
@@ -161,61 +159,16 @@ app.get('/users', async (req, res) => {
     }
 })
 
-app.get('/users', async(req, res) => {
-    const client = new MongoClient(uri)
-    const userIds = JSON.parse(req.query.userIds)
-    console.log(userIds)
-
-    try{
-        await client.connect()
-        const database = client.db('app-data')
-        const users = database.collection('users')
-
-        const pipeline =
-        [
-            {
-                '$match': {
-                    'user_id': {
-                        '$in': userIds
-                    }
-                }
-            }
-        ]
-        const foundUsers = await users.aggregate(pipeline).toArray()
-        console.log(foundUsers)
-        res.send(foundUsers)
-
-    } finally {
-        await client.close()
-
-    }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Get all the Gendered Users in the Database
 app.get('/gendered-users', async (req, res) => {
     const client = new MongoClient(uri)
     const gender = req.query.gender
 
-
-    console.log('gender', gender)
-
     try {
         await client.connect()
         const database = client.db('app-data')
         const users = database.collection('users')
-        const query = {gender_identity: { $eq: 'man'}}
+        const query = {gender_identity: { $eq: gender}}
         const foundUsers = await users.find(query).toArray()
         res.json(foundUsers)
 
@@ -298,29 +251,5 @@ app.post('/message', async (req, res) => {
 
     
 })
-
-
-
-app.put('/addmatch', async (req, res) => {
-    const client = new MongoClient(uri)
-    const { userId, matchedUserId } = req.body
-
-    try {
-        await client.connect()
-        const database = client.db('app-data')
-        const users = database.collection('users')
-
-        const query = { user_id: userId }
-        const updateDocument = {
-            $push: { matches: { user_id: matchedUserId}},
-        }
-        const user = await users.updateOne(query, updateDocument)
-        res.send(user)
-    } finally {
-        await client.close()
-    }
-
-})
-
 
 app.listen(PORT, () => console.log('Server running on PORT' + PORT))

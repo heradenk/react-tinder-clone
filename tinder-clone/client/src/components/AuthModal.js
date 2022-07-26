@@ -8,7 +8,7 @@ const AuthModal = ({ setShowModal, isSignUp }) => {
     const [ password, setPassword] = useState(null)
     const [ confirmPassword, setConfirmPassword] = useState(null)
     const [error, setError] = useState(null)
-    const [cookies, setCookie, removeCookie] = useCookies(['user'])
+    const [cookies, setCookie, removeCookie] = useCookies(null)
     
     let navigate = useNavigate()
 
@@ -37,8 +37,8 @@ const AuthModal = ({ setShowModal, isSignUp }) => {
             
             const success = response.status === 201
 
-            if (success && isSignUp) navigate('/onboarding')
-            if ( success && !isSignUp) navigate('/dashboard')
+            if (success && isSignUp) navigate ('/onboarding')
+            if (success && !isSignUp) navigate ('/dashboard')
 
             window.location.reload()
 

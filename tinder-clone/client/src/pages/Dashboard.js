@@ -46,43 +46,38 @@ const Dashboard = () => {
         }
     }, [user])
 
-    console.log(genderedUsers)
-
-    const updateMatches = async(matchedUserId) => {
+    const updateMatches = async (matchedUserId) => {
         try {
             await axios.put('http://localhost:8000/addmatch',{
                 userId,
                 matchedUserId
             })
             getUser()
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.log(err)
         }
     }
 
-    console.log(user)
 
     const swiped = (direction, swipedUserId) => {
-        
         if (direction === 'right') {
             updateMatches(swipedUserId)
         }
         setLastDirection(direction)
-    
     }
 
     const outOfFrame = (name) => {
         console.log(name + ' left the screen!')
     }
 
-    const matchedUserIds = user?.matches.map(({ user_id }) => user_id).concat(userId)
+    const matchedUserIds = user?.matches.map(({user_id}) => user_id).concat(userId)
 
-    const filteredGenderedUsers = genderedUsers?.filter(
-        genderedUser => !matchedUserIds.includes(genderedUser.user_id)
-    )
+    const filteredGenderedUsers = genderedUsers?.filter(genderedUser => !matchedUserIds.includes(genderedUser.user_id))
+    
 
+    console.log('filteredGenderedUsers', filteredGenderedUsers)
     return (<>
-        { user && 
+        {user && 
         <div className="dashboard">
             <ChatContainer user={user}/>
             <div className="swipe-container">
@@ -91,25 +86,23 @@ const Dashboard = () => {
                     {filteredGenderedUsers?.map((genderedUser) =>
                         <TinderCard 
                             className='swipe'
-                            key={genderedUser.first_name} 
+                            key={genderedUser.user_id} 
                             onSwipe={(dir) => swiped(dir, genderedUser.user_id)} 
                             onCardLeftScreen={() => outOfFrame(genderedUser.first_name)}>
-                            <div style={{ backgroundImage: 'url(' + genderedUser.url + ')' }} 
-                                className='card'
-                            ><h3>{genderedUser.first_name}</h3>
+                            <div 
+                                style={{ backgroundImage: "url(" + genderedUser.url + ")" }} 
+                                className="card">
+                                <h3>{genderedUser.first_name}</h3>
                             </div>
                         </TinderCard>
                     )}
                     <div className="swipe-info">
                         {lastDirection ? <p>You swiped {lastDirection}</p> : <p/>}
                     </div>
-
-
-                    
                 </div>
             </div>
         </div>}
-         </>
+    </>
     )
 }
 export default Dashboard
